@@ -4,6 +4,7 @@ import "dotenv/config";
 import bcrypt from "bcrypt";
 import { nanoid } from "nanoid";
 import jwt from "jsonwebtoken";
+import cors from 'cors';
 
 import User from "./Schema/User.js";
 
@@ -14,7 +15,7 @@ let emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/; // regex for e
 let passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/; // regex for password
 
 server.use(express.json());
-
+server.use(cors()); 
 mongoose.connect(process.env.DB_LOCATION, {
   autoIndex: true,
 });
@@ -46,9 +47,9 @@ const generateUsername = async (email) => {
 };
 
 server.post("/signup", (req, res) => {
-  let { fullName, email, password } = req.body;
+  let { fullname, email, password } = req.body;
 
-  if (fullName.length < 3) {
+  if (fullname.length < 3) {
     return res
       .status(403)
       .json({ error: "Fullname must be at least 3 letters long" });
@@ -71,7 +72,7 @@ server.post("/signup", (req, res) => {
 
     let user = new User({
       personal_info: {
-        fullname: fullName,
+        fullname: fullname,
         email: email,
         password: hashed_password,
         username,
