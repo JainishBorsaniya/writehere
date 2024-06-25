@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import "dotenv/config";
 import bcrypt from "bcrypt";
 import { nanoid } from "nanoid";
+import jwt from "jsonwebtoken";
 
 import User from "./Schema/User.js";
 
@@ -17,6 +18,20 @@ server.use(express.json());
 mongoose.connect(process.env.DB_LOCATION, {
   autoIndex: true,
 });
+
+const formatDataToSend = (user) => {
+  const access_token = jwt.sign(
+    { id: user._id },
+    process.env.SECRET_ACCESS_KEY
+  );
+
+  return {
+    access_token,
+    profile_img: user.personal_info.profile_img,
+    username: user.personal_info.username,
+    fullname: user.personal_info.fullname,
+  };
+};
 
 const generateUsername = async (email) => {
   let username = email.split("@")[0];
@@ -66,7 +81,7 @@ server.post("/signup", (req, res) => {
     user
       .save()
       .then((u) => {
-        return res.status(200).json({ user: u });
+        return res.status(200).json(formatDataToSend(u));
       })
       .catch((err) => {
         if (err.code == 11000) {
@@ -76,6 +91,35 @@ server.post("/signup", (req, res) => {
         return res.status(500).json({ error: err.message });
       });
   });
+});
+
+server.post("/signin", (req, res) => {
+  let { email, password } = req.body;
+
+  User.findOne({ "personal_info.email": email })
+    .then((user) => {
+      if (!user) {
+      }
+      console.log(user);
+
+      bcrypt.compare(password, user.personal_info.password, (err, result) => {
+        if (err) {
+          return res
+            .status(403)
+            .json({ error: "Error occured while login please try again" });
+        }
+
+        if (!result) {
+          return res.status(403).json({ error: "Password incorrect" });
+        } else {
+          return res.status(200).json(formatDataToSend(user));
+        }
+      });
+    })
+    .catch((err) => {
+      console.log(err.message);
+      return res.status(500).json({ error: err.message });
+    });
 });
 
 server.listen(PORT, () => {
