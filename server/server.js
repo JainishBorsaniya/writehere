@@ -99,26 +99,24 @@ server.post("/signin", (req, res) => {
   User.findOne({ "personal_info.email": email })
     .then((user) => {
       if (!user) {
+        return res.status(403).json({ 'error': 'Email not found' })
       }
-      console.log(user);
 
       bcrypt.compare(password, user.personal_info.password, (err, result) => {
         if (err) {
-          return res
-            .status(403)
-            .json({ error: "Error occured while login please try again" });
+          return res.status(403).json({ "error": "Error occured while login please try again" })
         }
 
         if (!result) {
-          return res.status(403).json({ error: "Password incorrect" });
-        } else {
-          return res.status(200).json(formatDataToSend(user));
+          return res.status(403).json({ "error": "Password incorrect" })
         }
-      });
+        else {
+          return res.status(200).json(formatDataToSend(user))
+        }
+      })
     })
     .catch((err) => {
-      console.log(err.message);
-      return res.status(500).json({ error: err.message });
+      return res.status(500).json({ "error": err.message });
     });
 });
 
