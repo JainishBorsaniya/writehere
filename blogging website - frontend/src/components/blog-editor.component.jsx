@@ -3,12 +3,13 @@ import logo from '../imgs/logo.png';
 import AnimationWrapper from "../common/page-animation";
 import defaultBanner from "../imgs/blog banner.png"
 import { uploadImage } from "../common/aws";
-import { useRef } from "react";
+import { useContext, useRef } from "react";
 import { toast, Toaster } from 'react-hot-toast'
+import { EditorContext } from "../pages/editor.pages";
 
 const BlogEditor = () => {
 
-    let blogBannerRef = useRef();
+    let { blog, blog: { title, banner, content, tags, des }, setBlog } = useContext(EditorContext)
 
     const handleBannerUpload = (e) => {
 
@@ -23,7 +24,7 @@ const BlogEditor = () => {
 
                     toast.dismiss(loadingToast);
                     toast.success("Uploaded")
-                    blogBannerRef.current.src = url;
+                    setBlog({ ...blog, banner: url })
 
                 }
             })
@@ -48,6 +49,14 @@ const BlogEditor = () => {
 
         input.style.height = 'auto';
         input.style.height = input.scrollHeight + "px";
+
+        setBlog({ ...blog, title: input.value })
+    }
+
+    const handleError = (e) => {
+        let img = e.target;
+
+        img.src = defaultBanner;
     }
 
     return (
@@ -57,7 +66,7 @@ const BlogEditor = () => {
                     <img src={logo} />
                 </Link>
                 <p className="max-md:hidden text-black line-clamp-1 w-full">
-                    New Blog
+                    {title.length ? title : "New Blog"}
                 </p>
 
                 <div className="flex gap-4 ml-auto">
@@ -75,7 +84,7 @@ const BlogEditor = () => {
                     <div className="mx-auto max-w-[900px] w-full">
                         <div className="relative aspect-video opacity-80 bg-white border-4 border-grey">
                             <label htmlFor="uploadBanner">
-                                <img ref={blogBannerRef} src={defaultBanner} className="z-20" />
+                                <img src={banner} onError={handleError} className="z-20" />
                                 <input id="uploadBanner" type="file" accept=".png, .jpg, .jpeg" hidden onChange={handleBannerUpload} />
                             </label>
                         </div>
