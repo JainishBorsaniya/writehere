@@ -11,24 +11,43 @@ const BlogEditor = () => {
     let blogBannerRef = useRef();
 
     const handleBannerUpload = (e) => {
- 
+
         let img = e.target.files[0];
 
-        if(img){
+        if (img) {
 
             let loadingToast = toast.loading("Uploading...")
 
             uploadImage(img).then((url) => {
-                if(url){
+                if (url) {
 
-                   toast.dismiss(loadingToast);
-                   toast.success("Uploaded")
-                   blogBannerRef.current.src = url;
+                    toast.dismiss(loadingToast);
+                    toast.success("Uploaded")
+                    blogBannerRef.current.src = url;
 
                 }
             })
+                .catch(err => {
+                    toast.dismiss(loadingToast);
+                    return toast.error(err);
+                })
         }
 
+    }
+
+    const handleTitleKeyDown = (e) => {
+
+        if (e.keyCode === 13) {
+            e.preventDefault();
+        }
+
+    }
+
+    const handleTitleChange = (e) => {
+        let input = e.target;
+
+        input.style.height = 'auto';
+        input.style.height = input.scrollHeight + "px";
     }
 
     return (
@@ -53,13 +72,17 @@ const BlogEditor = () => {
             <Toaster />
             <AnimationWrapper>
                 <section>
-                    <div className="mx-auto max-w-[900px] w-full"> 
+                    <div className="mx-auto max-w-[900px] w-full">
                         <div className="relative aspect-video opacity-80 bg-white border-4 border-grey">
-                             <label htmlFor="uploadBanner">
-                                <img ref={blogBannerRef}  src={defaultBanner} className="z-20"/>
-                                <input id="uploadBanner" type="file" accept=".png, .jpg, .jpeg" hidden onChange={handleBannerUpload}/>
-                             </label>
+                            <label htmlFor="uploadBanner">
+                                <img ref={blogBannerRef} src={defaultBanner} className="z-20" />
+                                <input id="uploadBanner" type="file" accept=".png, .jpg, .jpeg" hidden onChange={handleBannerUpload} />
+                            </label>
                         </div>
+
+                        <textarea placeholder="Blog Title" className="text-4xl font-medium w-full h-20 outline-none resize-none mt-10 leading-tight placeholder:opacity-40" onClick={handleTitleKeyDown} onChange={handleTitleChange}>
+                        </textarea>
+
                     </div>
                 </section>
             </AnimationWrapper>
